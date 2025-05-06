@@ -1,4 +1,3 @@
-// ExpedienteModel.js
 import db from "../database/db.js";
 import { DataTypes } from "sequelize";
 
@@ -22,13 +21,37 @@ const ExpedienteModel = db.define(
   }
 );
 
-const TerapeutaModel = db.define(
-  "terapeuta",
+const UsuarioModel = db.define(
+  "usuarios",
   {
-    numero_tel: { type: DataTypes.STRING, primaryKey: true },
-    nombre: { type: DataTypes.STRING },
-    tipo: { type: DataTypes.STRING(3) },
-    createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    id_usuario: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    numero_tel: {
+      type: DataTypes.STRING(15),
+      allowNull: false,
+      unique: true,
+    },
+    nombre: {
+      type: DataTypes.STRING(100),
+    },
+    correo: {
+      type: DataTypes.STRING(150),
+    },
+    password: {
+      type: DataTypes.STRING(255),
+    },
+    tipo_usuario: {
+      type: DataTypes.STRING(3),
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
     updatedAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -37,6 +60,13 @@ const TerapeutaModel = db.define(
   },
   {
     timestamps: true,
+    tableName: "usuarios",
+    indexes: [
+      {
+        unique: true,
+        fields: ["numero_tel"],
+      },
+    ],
   }
 );
 
@@ -49,8 +79,8 @@ const PacientesTerapeutasModel = db.define(
       primaryKey: true,
     },
     numero_tel_terapeuta: {
-      type: DataTypes.STRING,
-      references: { model: TerapeutaModel, key: "numero_tel" },
+      type: DataTypes.STRING(15),
+      references: { model: UsuarioModel, key: "numero_tel" },
       primaryKey: true,
     },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -84,10 +114,11 @@ const EstadoActualModel = db.define(
     },
   },
   {
-    tableName: "estado_actual", // Especificar el nombre de la tabla
+    tableName: "estado_actual",
     timestamps: true,
   }
 );
+
 const PacienteEstadoModel = db.define(
   "paciente_estado",
   {
@@ -101,7 +132,7 @@ const PacienteEstadoModel = db.define(
     numero_tel_terapeuta: {
       type: DataTypes.STRING(15),
       allowNull: false,
-      references: { model: TerapeutaModel, key: "numero_tel" },
+      references: { model: UsuarioModel, key: "numero_tel" }, // Cambiado a UsuarioModel
       primaryKey: true,
     },
     sesion_num: { type: DataTypes.INTEGER, allowNull: true },
@@ -125,12 +156,12 @@ const CitaModel = db.define(
     exp_num: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: { model: "pacientes", key: "exp_num" },
+      references: { model: ExpedienteModel, key: "exp_num" },
     },
     numero_tel_terapeuta: {
       type: DataTypes.STRING(15),
       allowNull: true,
-      references: { model: "terapeuta", key: "numero_tel" },
+      references: { model: UsuarioModel, key: "numero_tel" }, // Cambiado a UsuarioModel
     },
     fecha: { type: DataTypes.DATE, allowNull: true },
     hora: { type: DataTypes.TIME, allowNull: true },
@@ -142,33 +173,38 @@ const CitaModel = db.define(
     },
   },
   {
-    tableName: "cita", // Especificar el nombre de la tabla
+    tableName: "cita",
     timestamps: true,
   }
 );
 
-export default CitaModel;
-// Definimos las relaciones
-ExpedienteModel.belongsToMany(TerapeutaModel, {
+// Definición de relaciones
+ExpedienteModel.belongsToMany(UsuarioModel, {
   through: PacientesTerapeutasModel,
   foreignKey: "exp_num",
+  otherKey: "numero_tel_terapeuta",
+  as: "terapeutas", // Opcional: alias para la relación
 });
-TerapeutaModel.belongsToMany(ExpedienteModel, {
+
+UsuarioModel.belongsToMany(ExpedienteModel, {
   through: PacientesTerapeutasModel,
   foreignKey: "numero_tel_terapeuta",
+  otherKey: "exp_num",
+  as: "pacientes", // Opcional: alias para la relación
 });
 
 EstadoActualModel.belongsTo(ExpedienteModel, { foreignKey: "exp_num" });
 
 PacienteEstadoModel.belongsTo(ExpedienteModel, { foreignKey: "exp_num" });
-PacienteEstadoModel.belongsTo(TerapeutaModel, {
+PacienteEstadoModel.belongsTo(UsuarioModel, {
   foreignKey: "numero_tel_terapeuta",
+  as: "terapeuta", // Opcional: alias para la relación
 });
 
-// Exportamos todos los modelos de la misma manera
+// Exportamos  modelos
 export {
   ExpedienteModel,
-  TerapeutaModel,
+  UsuarioModel,
   PacientesTerapeutasModel,
   PacienteEstadoModel,
   EstadoActualModel,

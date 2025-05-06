@@ -1,20 +1,35 @@
 import express from "express";
+
 import {
-  getCitasSinFechaNiHoraPorExpNum,
-  updateEstadoActualTerminado,
-  updateCitaFechaHora,
-  getCitasSinFechaNiHora,
-  getCitasByTerapeuta,
-  createCita,
-  getTerapeutasByTipo,
-  createEstadoActual,
   createExpediente,
   getExpediente,
-  getTerapeuta,
-  getTerapeutaWithPatients,
   updateExpediente,
-  getEstadoActualByTerapeuta,
+  createUsuario,
+  completeRegistration,
+  getUsuario,
+  getUsuariosByTipo,
+  getOnlyTerapeutas,
+  getUsersValidForRegistration,
+  getValidUserForRegistration,
+  login,
+  getTiposUsuario,
   createPacientesTerapeutas,
+  getPacientesTerapeutas,
+  updatePacientesTerapeutas,
+  deletePacientesTerapeutas,
+  updateEstadoActualTerminado,
+  createEstadoActual,
+  getTerapeutaWithPatients,
+  getEstadoActualByTerapeuta,
+  createCita,
+  getCitasSinFechaNiHora,
+  getCitasByTerapeuta,
+  getCitas,
+  getCitaById,
+  updateCita,
+  updateCitaFechaHora,
+  deleteCita,
+  getCitasSinFechaNiHoraPorExpNum,
 } from "../controllers/ExpedienteController.js";
 
 const router = express.Router();
@@ -27,14 +42,30 @@ router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
 
 router.get("/estadopacientes/:numero_tel", getEstadoActualByTerapeuta);
 
-router.get("/terapeuta/:numero_tel", getTerapeuta);
+//router.get("/terapeuta/:numero_tel", getTerapeuta); *********
 
 router.post("/pacientesterapeutas", createPacientesTerapeutas);
 
 router.post("/pacienteestado/actual", createEstadoActual);
 
-///agarrar el tipo de terapeuta
-router.get("/terapeutas/:tipo", getTerapeutasByTipo);
+router.post("/usuarios", createUsuario);
+
+// Obtener todos los terapeutas (opcional: filtrar por tipo con query ?tipo=A)
+router.get("/usuarios/terapeutas", getOnlyTerapeutas);
+
+router.get("/usuarios/registervalid", getUsersValidForRegistration);
+
+router.post("/usuarios/completeregistration", completeRegistration);
+
+router.post("/usuarios/login", login);
+// Obtener tipos de usuario (debe ir antes para evitar conflictos)
+router.get("/usuarios/tipos", getTiposUsuario);
+
+// Obtener usuarios por tipo específico
+router.get("/usuarios/tipo/:tipo", getUsuariosByTipo);
+
+router.get("/usuarios/registervalid/:numero_tel", getValidUserForRegistration);
+
 ///hacer una cita, se panda en el doby un json con { "exp_num": 123, "numero_tel_terapeuta": "6648425432" } por ejemplo
 //la cita queda con fecha y hora null
 router.post("/cita", createCita);
