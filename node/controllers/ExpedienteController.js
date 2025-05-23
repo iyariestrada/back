@@ -54,11 +54,66 @@ const TIPOS_USUARIO = {
   TERAPEUTA_AC: "AC",
   TERAPEUTA_BC: "BC",
   TERAPEUTA_ABC: "ABC",
+  TERAPEUTA: "NA",
 };
 
 // combinaciones válidas
 const TIPOS_VALIDOS = Object.values(TIPOS_USUARIO);
 
+// para crear un nuevo usuario se necesita minimo numero de telefono y tipo de usuario
+export const createUsuario = async (req, res) => {
+  try {
+    const { numero_tel, tipo_usuario } = req.body;
+
+    // Validar el tipo de usuario
+    if (!TIPOS_VALIDOS.includes(tipo_usuario)) {
+      return res.status(400).json({
+        message: `Tipo de usuario no válido. Los tipos permitidos son: ${TIPOS_VALIDOS.join(
+          ", "
+        )}`,
+        tipos_validos: TIPOS_VALIDOS,
+      });
+    }
+
+    // Validar combinaciones exclusivas para terapeutas
+    if (
+      tipo_usuario !== TIPOS_USUARIO.ADMINISTRADOR &&
+      tipo_usuario !== TIPOS_USUARIO.RECEPCIONISTA
+    ) {
+      if (!/^[ABC]+$/.test(tipo_usuario)) {
+        return res.status(400).json({
+          message:
+            "Combinación de terapeuta no válida. Use solo A, B, C o sus combinaciones",
+        });
+      }
+    }
+
+    // Verificar si el número de teléfono ya está registrado
+    const usuarioExistente = await UsuarioModel.findOne({
+      where: { numero_tel },
+    });
+    if (usuarioExistente) {
+      return res.status(400).json({
+        message: "Número de teléfono ya registrado",
+      });
+    }
+
+    // Crear el nuevo usuario
+    const usuario = await UsuarioModel.create(req.body);
+    res.status(201).json({
+      message: `${getRolNombre(tipo_usuario)} creado exitosamente`,
+      data: usuario,
+      tipo: tipo_usuario,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al crear usuario",
+      error: error.message,
+      detalles: error.errors?.map((e) => e.message),
+    });
+  }
+};
+/*
 export const createUsuario = async (req, res) => {
   try {
     const { tipo_usuario } = req.body;
@@ -99,7 +154,7 @@ export const createUsuario = async (req, res) => {
       detalles: error.errors?.map((e) => e.message),
     });
   }
-};
+};*/
 
 export const completeRegistration = async (req, res) => {
   try {
@@ -224,10 +279,11 @@ export const getUsuariosByTipo = async (req, res) => {
     }
 
     res.json({
-      count: usuarios.length,
-      tipo_buscado: tipo,
-      tipo_descripcion: getRolNombre(tipo),
-      resultados: usuarios,
+      //count: usuarios.length,
+      //tipo_buscado: tipo,
+      //tipo_descripcion: getRolNombre(tipo),
+      //resultados: usuarios,
+      usuarios,
     });
   } catch (error) {
     res.status(500).json({
@@ -294,68 +350,7 @@ export const getOnlyTerapeutas = async (req, res) => {
     });
   }
 };
-/*
-export const getUsersValidForRegistration = async (req, res) => {
-  try {
-    const { tipo, rol } = req.query; // rol puede ser 'TER' (terapeuta), 'REC' (recepcionista) o ambos
-
-    let whereCondition = {
-      tipo_usuario: {
-        [Op.or]: [],
-      },
-    };
-
-    // Definir los roles a incluir
-    if (rol) {
-      const roles = rol.split(",");
-      whereCondition.tipo_usuario[Op.or] = roles;
-    } else {
-      // Por defecto, incluir terapeutas y recepcionistas
-      whereCondition.tipo_usuario[Op.or] = [
-        { [Op.regexp]: "^[ABC]+$" }, // Terapeutas (A, B, C, AB, etc.)
-        { [Op.eq]: "R" }, // Recepcionistas
-      ];
-    }
-
-    // Filtro adicional para tipos de terapeutas
-    if (tipo && ["A", "B", "C", "AB", "AC", "BC", "ABC"].includes(tipo)) {
-      whereCondition[Op.and] = [
-        { tipo_usuario: whereCondition.tipo_usuario },
-        { tipo_usuario: { [Op.regexp]: `^[ABC]*${tipo}[ABC]*$` } },
-      ];
-      delete whereCondition.tipo_usuario;
-    }
-
-    const staff = await UsuarioModel.findAll({
-      where: whereCondition,
-      order: [["nombre", "ASC"]],
-      attributes: [
-        "id_usuario",
-        "numero_tel",
-        "nombre",
-        "correo",
-        "tipo_usuario",
-        "createdAt",
-      ],
-    });
-
-    res.json({
-      count: staff.length,
-      filtros: {
-        tipo_terapeuta: tipo || "Todos",
-        rol: rol || "TER,REC",
-      },
-      staff: staff,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error al obtener el personal",
-      error: error.message,
-    });
-  }
-};*/
-
-// los usuarios que no han conpletado su registro son aquellos que no tienen password
+// los usuarios que no han completado su registro son aquellos que no tienen password
 export const getUsersValidForRegistration = async (req, res) => {
   try {
     // incluir solo terapeutas y recepcionistas
@@ -422,61 +417,6 @@ export const getValidUserForRegistration = async (req, res) => {
     });
   }
 };
-/*
-export const login = async (req, res) => {
-  try {
-    const { numero_tel, password } = req.body;
-
-    const usuario = await UsuarioModel.findOne({
-      where: {
-        numero_tel,
-      },
-    });
-
-    if (!usuario) {
-      return res.status(404).json({
-        success: false,
-        message: "Usuario no encontrado",
-      });
-    }
-
-    if (!password || !usuario.password) {
-      return res.status(400).json({
-        success: false,
-        message: "Datos de autenticación inválidos",
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, usuario.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Contraseña incorrecta",
-      });
-    }
-
-    // Si todo es correcto, generar un token (JWT) o iniciar sesión
-    //const token = generarToken(usuario.id); // Ejemplo: Implementación de JWT
-    //indicar el userId
-    // Generar token JWT
-    const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    res.json({
-      success: true,
-      message: "Inicio de sesión exitoso",
-      token, // Opcional: Enviar token para autenticación posterior
-    });
-  } catch (error) {
-    console.error("Error en completeRegistration:", error); // ← esto te dará más claridad
-    res.status(500).json({
-      success: false,
-      message: "Error al iniciar sesión",
-    });
-  }
-};*/
 
 export const login = async (req, res) => {
   try {
@@ -507,7 +447,7 @@ export const login = async (req, res) => {
     if (!usuario.password) {
       return res.status(401).json({
         success: false,
-        message: "La cuenta no tiene contraseña asignada",
+        message: "La cuenta no ha finalizado su registro",
       });
     }
 
@@ -517,24 +457,34 @@ export const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: "Contraseña incorrecta",
+        message: "Credenciales incorrectas",
       });
     }
 
     // Generar token JWT
-    const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, {
-      expiresIn: "1m",
-    });
+    const token = jwt.sign(
+      {
+        id: usuario.id_usuario,
+        numero_tel: usuario.numero_tel,
+        tipo: usuario.tipo_usuario,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    // Éxito
     res.json({
       success: true,
       message: "Inicio de sesión exitoso",
       token,
-      user: { id: usuario.id, nombre: usuario.nombre }, // Opcional: enviar datos del usuario
+      user: {
+        id: usuario.id_usuario,
+        nombre: usuario.nombre,
+        numero_tel: usuario.numero_tel,
+        tipo: usuario.tipo_usuario,
+      },
     });
   } catch (error) {
-    console.error("Error en login:", error); // Log para debugging
+    console.error("Error en login:", error);
     res.status(500).json({
       success: false,
       message: "Error al iniciar sesión",
@@ -591,6 +541,27 @@ export const createPacientesTerapeutas = async (req, res) => {
 };
 
 // ExpedienteController.js
+
+export const getPacientes = async (req, res) => {
+  try {
+    const pacientes = await ExpedienteModel.findAll({
+      order: [["nombre", "ASC"]],
+      attributes: [
+        "exp_num",
+        "nombre",
+        "fecha_nacimiento",
+        "numero_tel",
+        "remitido",
+      ],
+    });
+    res.json(pacientes);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener pacientes",
+      error: error.message,
+    });
+  }
+};
 
 export const getPacientesTerapeutas = async (req, res) => {
   try {
@@ -673,10 +644,10 @@ export const getTerapeutaWithPatients = async (req, res) => {
     }
 
     // Obtener el terapeuta
-    const terapeuta = await UsuarioModel.findOne({ where: { numero_tel } });
+    const usuario = await UsuarioModel.findOne({ where: { numero_tel } });
 
-    if (!terapeuta) {
-      return res.status(404).json({ message: "Terapeuta no encontrado" });
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
     // Obtener los pacientes asociados
@@ -688,7 +659,7 @@ export const getTerapeutaWithPatients = async (req, res) => {
       where: { exp_num: exp_nums },
     });
 
-    res.json({ terapeuta, pacientes });
+    res.json({ usuario, pacientes });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -716,6 +687,22 @@ export const getEstadoActualByTerapeuta = async (req, res) => {
     const estadosActuales = await EstadoActualModel.findAll({
       where: { exp_num: expNums },
     });
+
+    res.json(estadosActuales);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getEstadoActualTodosPacientes = async (req, res) => {
+  try {
+    const estadosActuales = await EstadoActualModel.findAll({
+      order: [["exp_num", "ASC"]],
+    });
+
+    if (estadosActuales.length === 0) {
+      return res.status(404).json({ message: "No se encontraron estados" });
+    }
 
     res.json(estadosActuales);
   } catch (error) {
@@ -823,13 +810,14 @@ export const updateCita = async (req, res) => {
 export const updateCitaFechaHora = async (req, res) => {
   try {
     const { cita_id } = req.params;
-    const { fecha, hora } = req.body;
+    const { numero_tel_terapeuta, fecha, hora } = req.body;
 
     const cita = await CitaModel.findByPk(cita_id);
     if (!cita) {
       return res.status(404).json({ message: "Cita no encontrada" });
     }
 
+    cita.numero_tel_terapeuta = numero_tel_terapeuta;
     cita.fecha = fecha;
     cita.hora = hora;
     await cita.save();
