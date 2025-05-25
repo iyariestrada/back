@@ -210,3 +210,5 @@ export {
   EstadoActualModel,
   CitaModel,
 };
+
+export default UsuarioModel;
