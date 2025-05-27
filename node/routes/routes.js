@@ -31,6 +31,10 @@ import {
   updateUserPhone,
   updateUserData,
   updatePassword,
+  deleteUsuario,
+  forgotPassword,
+  verifyCode,
+  resetPassword,
 } from "../controllers/UsuariosController.js";
 
 import {
@@ -53,6 +57,9 @@ router.post("/usuarios/login", login);
 router.get("/usuarios/tipos", getTiposUsuario);
 router.get("/usuarios/registervalid/:numero_tel", getValidUserForRegistration);
 router.post("/usuarios/completeregistration", completeRegistration);
+router.post("/usuarios/forgotpass", forgotPassword);
+router.post("/usuarios/verifycode", verifyCode);
+router.post("/usuarios/resetpass", resetPassword);
 
 // Rutas protegidas (requieren token válido)
 router.post("/", createExpediente);
@@ -78,6 +85,7 @@ router.get("/usuarios/:numero_tel", getUsuario);
 router.put("/usuarios/:numero_tel", updateUserData);
 router.put("/usuarios/updatephone/:numero_tel", updateUserPhone);
 router.put("/usuarios/changepassword/:numero_tel", updatePassword);
+router.delete("/usuarios/:numero_tel", deleteUsuario);
 
 // Rutas de citas protegidas
 router.post("/cita", createCita);

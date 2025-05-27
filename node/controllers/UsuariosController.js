@@ -8,7 +8,9 @@ import {
 } from "../models/ExpedienteModel.js";
 
 import { Op } from "sequelize";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { sendResetEmail } from "../services/emailService.js";
 import jwt from "jsonwebtoken";
 
 // Lista tipos de usuario posibles
@@ -617,6 +619,181 @@ export const updatePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     await usuario.update({ password: hashedPassword });
+
+    res.json({
+      success: true,
+      message: "Contraseña actualizada correctamente",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al actualizar la contraseña",
+      error: error.message,
+    });
+  }
+};
+export const deleteUsuario = async (req, res) => {
+  try {
+    const { numero_tel } = req.params;
+
+    const usuario = await UsuarioModel.findOne({ where: { numero_tel } });
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Si es terapeuta
+    const tiposTerapeuta = ["A", "B", "C", "AB", "AC", "BC", "ABC"];
+    if (tiposTerapeuta.includes(usuario.tipo_usuario)) {
+      const citas = await CitaModel.findAll({
+        where: { numero_tel_terapeuta: numero_tel },
+      });
+
+      // Limpiar citas para ser reasignadas
+      for (const cita of citas) {
+        await cita.update({
+          fecha: null,
+          hora: null,
+          numero_tel_terapeuta: null,
+        });
+      }
+
+      // Buscar todos los exp_num relacionados a este terapeuta
+      const relaciones = await PacientesTerapeutasModel.findAll({
+        where: { numero_tel_terapeuta: numero_tel },
+        attributes: ["exp_num"],
+      });
+      const expNums = relaciones.map((r) => r.exp_num);
+
+      // Eliminar todos los registros de pacientes_terapeuta con esos exp_num
+      if (expNums.length > 0) {
+        await PacientesTerapeutasModel.destroy({
+          where: { exp_num: expNums },
+        });
+      }
+    }
+
+    // Eliminar cualquier relación directa por número de terapeuta
+    await PacientesTerapeutasModel.destroy({
+      where: { numero_tel_terapeuta: numero_tel },
+    });
+
+    await usuario.destroy();
+
+    res.json({
+      success: true,
+      message:
+        "Usuario eliminado correctamente. Las citas y relaciones quedaron libres para reasignar.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al eliminar usuario",
+      error: error.message,
+    });
+  }
+};
+
+// Funciones para recuperación de contraseña
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await UsuarioModel.findOne({ where: { correo: email } });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No se encontró una cuenta con ese correo",
+      });
+    }
+
+    // Generar código de 6 dígitos
+    const resetCode = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+
+    await user.update({
+      resetPasswordCode: resetCode,
+      resetPasswordExpires: expiresAt,
+    });
+
+    // Enviar correo con el código
+    await sendResetEmail(email, resetCode);
+
+    res.json({
+      success: true,
+      message: "Código de recuperación enviado",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al procesar la solicitud",
+      error: error.message,
+      stack: error.stack, // Esto muestra el stacktrace
+      detalles: error, // Esto muestra el objeto error completo (puedes quitarlo si es muy extenso)
+    });
+  }
+};
+
+export const verifyCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    const user = await UsuarioModel.findOne({
+      where: {
+        correo: email,
+        resetPasswordCode: code,
+        resetPasswordExpires: { [Op.gt]: new Date() },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Código inválido o expirado",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Código verificado correctamente",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al verificar el código",
+      error: error.message,
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    const user = await UsuarioModel.findOne({
+      where: {
+        correo: email,
+        resetPasswordCode: code,
+        resetPasswordExpires: { [Op.gt]: new Date() },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Código inválido o expirado",
+      });
+    }
+
+    // Encriptar nueva contraseña
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await user.update({
+      password: hashedPassword,
+      resetPasswordCode: null,
+      resetPasswordExpires: null,
+    });
 
     res.json({
       success: true,

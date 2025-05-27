@@ -41,12 +41,20 @@ const UsuarioModel = db.define(
     correo: {
       type: DataTypes.STRING(150),
     },
-    password: {
-      type: DataTypes.STRING(255),
-    },
     tipo_usuario: {
       type: DataTypes.STRING(3),
       allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING(255),
+    },
+    resetPasswordCode: {
+      type: DataTypes.STRING(6),
+      allowNull: true,
+    },
+    resetPasswordExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
