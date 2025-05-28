@@ -4,6 +4,7 @@ import db from "./database/db.js";
 import expedienteRoutes from "./routes/routes.js";
 import dotenv from "dotenv";
 import citasRoutes from './routes/citasRoutes.js';
+import observacionesRoutes from './routes/observacionesRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/expedientes", expedienteRoutes);
 app.use('/citas', citasRoutes);
+app.use('/observaciones', observacionesRoutes);
 
 
 try {

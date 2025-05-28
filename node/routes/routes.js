@@ -33,6 +33,7 @@ import {
   updateCitaFechaHora,
   deleteCita,
   getCitasSinFechaNiHoraPorExpNum,
+  getCitasByPaciente,
 } from "../controllers/ExpedienteController.js";
 
 import {getCitasTerapeutaDia, getCitasTerapeutaDiaByDia, getCitasTerapeutaSemana} from "../controllers/HorarioController.js";
@@ -82,6 +83,9 @@ router.get("/horario/:numero_tel_terapeuta", getCitasTerapeutaDia);
 router.post("/horario/:numero_tel_terapeuta", getCitasTerapeutaDiaByDia);
 
 router.post("/horario/semana/:numero_tel_terapeuta", getCitasTerapeutaSemana);
+
+// rutas para timeline
+router.get("/citas/paciente/:exp_num", getCitasByPaciente);
 
 export default router;
 

@@ -888,3 +888,39 @@ export const getCitasSinFechaNiHoraPorExpNum = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Timeline obtener citas por paciente
+export const getCitasByPaciente = async (req, res) => {
+  try {
+    const { exp_num } = req.params;
+    
+    const citas = await CitaModel.findAll({
+      where: { exp_num },
+      include: [
+        {
+          model: ExpedienteModel,
+          attributes: ["nombre"],
+        },
+      ],
+      order: [
+        ['fecha', 'ASC'],
+        ['hora', 'ASC'],
+      ],
+    });
+
+    if (citas.length === 0) {
+      return res.status(404).json({ 
+        message: "No se encontraron citas para este paciente",
+        citas: []
+      });
+    }
+
+    res.json(citas);
+  } catch (error) {
+    console.error("Error al obtener citas del paciente:", error);
+    res.status(500).json({ 
+      message: "Error al obtener las citas del paciente",
+      error: error.message 
+    });
+  }
+};
