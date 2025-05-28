@@ -12,10 +12,10 @@ import jwt from "jsonwebtoken";
 
 export const createExpediente = async (req, res) => {
   try {
-    await ExpedienteModel.create(req.body);
-    res.json({ message: error });
+    const resp = await ExpedienteModel.create(req.body);
+    res.json({ message: "¡Expediente creado correctamente!" });
   } catch (error) {
-    res.json({ message: error });
+    res.status(400).json({error: error.message});
   }
 };
 
