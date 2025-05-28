@@ -149,34 +149,19 @@ const PacienteEstadoModel = db.define(
   }
 );
 
-const CitaModel = db.define(
-  "cita",
-  {
+const CitaModel = db.define("cita", {
     cita_id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    exp_num: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: { model: ExpedienteModel, key: "exp_num" },
-    },
-    numero_tel_terapeuta: {
-      type: DataTypes.STRING(15),
-      allowNull: true,
-      references: { model: UsuarioModel, key: "numero_tel" }, // Cambiado a UsuarioModel
-    },
-    fecha: { type: DataTypes.DATE, allowNull: true },
+    exp_num: { type: DataTypes.INTEGER, allowNull: true, references: { model: "pacientes", key: "exp_num" } },
+    numero_tel_terapeuta: { type: DataTypes.STRING(15), allowNull: true, references: { model: "terapeuta", key: "numero_tel" } },
+    fecha: { type: DataTypes.DATEONLY, allowNull: true },
     hora: { type: DataTypes.TIME, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      onUpdate: DataTypes.NOW,
-    },
-  },
-  {
-    tableName: "cita",
-    timestamps: true,
-  }
-);
+    updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, onUpdate: DataTypes.NOW },
+    etapa: { type: DataTypes.STRING(1), allowNull: true },
+}, {
+    tableName: 'cita', // Especificar el nombre de la tabla
+    timestamps: true
+});
 
 // Definición de relaciones
 ExpedienteModel.belongsToMany(UsuarioModel, {
@@ -200,6 +185,9 @@ PacienteEstadoModel.belongsTo(UsuarioModel, {
   foreignKey: "numero_tel_terapeuta",
   as: "terapeuta", // Opcional: alias para la relación
 });
+
+CitaModel.belongsTo(ExpedienteModel, { foreignKey: 'exp_num', targetKey: 'exp_num' });
+ExpedienteModel.hasMany(CitaModel, { foreignKey: 'exp_num', sourceKey: 'exp_num' });
 
 // Exportamos  modelos
 export {

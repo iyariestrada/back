@@ -35,6 +35,8 @@ import {
   getCitasSinFechaNiHoraPorExpNum,
 } from "../controllers/ExpedienteController.js";
 
+import {getCitasTerapeutaDia, getCitasTerapeutaDiaByDia, getCitasTerapeutaSemana} from "../controllers/HorarioController.js";
+
 const router = express.Router();
 
 // Rutas públicas (sin autenticación)
@@ -72,6 +74,14 @@ router.get("/citas/:numero_tel_terapeuta", getCitasByTerapeuta);
 router.put("/agendar-cita/:cita_id", updateCitaFechaHora);
 router.put("/estadoactual/:exp_num", updateEstadoActualTerminado);
 router.get("/cita/sinfecha/sinhora/:exp_num", getCitasSinFechaNiHoraPorExpNum);
+
+
+//horario de un dia de un terapeuta
+router.get("/horario/:numero_tel_terapeuta", getCitasTerapeutaDia);
+
+router.post("/horario/:numero_tel_terapeuta", getCitasTerapeutaDiaByDia);
+
+router.post("/horario/semana/:numero_tel_terapeuta", getCitasTerapeutaSemana);
 
 export default router;
 

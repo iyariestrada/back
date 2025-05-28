@@ -713,8 +713,17 @@ export const getEstadoActualTodosPacientes = async (req, res) => {
 // Crear una nueva cita
 export const createCita = async (req, res) => {
   try {
-    const { exp_num, numero_tel_terapeuta } = req.body;
-    const nuevaCita = await CitaModel.create({ exp_num, numero_tel_terapeuta });
+    const { exp_num, numero_tel_terapeuta, tipo } = req.body;
+    const nuevaCita = await CitaModel.create({ exp_num, numero_tel_terapeuta, tipo });
+    const pacienteTerapeuta = await PacientesTerapeutasModel.findOne({
+      where: { exp_num, numero_tel_terapeuta },
+    });
+    if (!pacienteTerapeuta) {
+      PacientesTerapeutasModel.create({
+        exp_num,
+        numero_tel_terapeuta,
+      });
+    }
     res.status(201).json(nuevaCita);
   } catch (error) {
     res.status(500).json({ message: error.message });
