@@ -3,6 +3,11 @@ import {
   PacientesTerapeutasModel,
   ExpedienteModel,
 } from "../models/ExpedienteModel.js";
+import {
+  PacienteEstadoModel,
+  PacientesTerapeutasModel,
+  ExpedienteModel,
+} from "../models/ExpedienteModel.js";
 
 // Crear un nuevo estado de paciente
 export const createPacienteEstado = async (req, res) => {
@@ -58,7 +63,9 @@ export const getPacienteEstadosByTerapeuta = async (req, res) => {
     const relaciones = await PacientesTerapeutasModel.findAll({
       where: { numero_tel_terapeuta },
       attributes: ["exp_num"],
+      attributes: ["exp_num"],
     });
+    const expNums = relaciones.map((r) => r.exp_num);
     const expNums = relaciones.map((r) => r.exp_num);
 
     // Buscar todos los estados de esos pacientes
@@ -77,6 +84,7 @@ export const getPacienteEstadosByTerapeuta = async (req, res) => {
 export const getAllPacienteEstados = async (req, res) => {
   try {
     const estados = await PacienteEstadoModel.findAll({
+      include: [{ model: ExpedienteModel, attributes: ["nombre", "exp_num"] }],
       include: [{ model: ExpedienteModel, attributes: ["nombre", "exp_num"] }],
     });
     res.json(estados);

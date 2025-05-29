@@ -15,6 +15,7 @@ router.post("/", createPacienteEstado);
 
 // Actualizar un estado de paciente
 router.put("/:exp_num", updatePacienteEstado);
+router.put("/:exp_num", updatePacienteEstado);
 
 // Eliminar un estado de paciente
 router.delete("/:id_estado", deletePacienteEstado);
