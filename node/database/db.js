@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 
-const db = new Sequelize("hic", "iyari", "", {
+const db = new Sequelize("hic_v2", "iyari", "", {
   host: "localhost",
   dialect: "mysql",
 });

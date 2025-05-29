@@ -1,39 +1,41 @@
 import {
-  ExpedienteModel,
-  UsuarioModel,
-  PacientesTerapeutasModel,
-  PacienteEstadoModel,
-  EstadoActualModel,
-  CitaModel,
+    ExpedienteModel,
+    UsuarioModel,
+    PacientesTerapeutasModel,
+    PacienteEstadoModel,
+    CitaModel,
 } from "../models/ExpedienteModel.js";
 import { Op } from "sequelize";
 import sequelize from "../database/db.js";
 
 //citas <= al dia de hoy
 export const getCitasTerapeutaDia = async (req, res) => {
-  const today = new Date(); // Obtiene la fecha actual
-  const currentDate = today.toISOString().split("T")[0]; // Convierte la fecha a string en formato YYYY-MM-DD
-  console.log("Fecha actual (como string):", currentDate);
-  const { numero_tel_terapeuta } = req.params;
-  try {
-    const citas = await CitaModel.findAll({
-      where: {
-        numero_tel_terapeuta: numero_tel_terapeuta,
-      },
-      include: [
-        {
-          model: ExpedienteModel,
-          attributes: ["nombre"],
-        },
-      ],
-    });
-    const citasNoHoy = citas.filter((cita) => cita.fecha === currentDate);
-    res.status(200).json(citasNoHoy);
-  } catch (error) {
-    console.error("Error al obtener las citas:", error);
-    res.status(500).json({ error: "Error al obtener las citas" });
-  }
-};
+
+    const today = new Date(); // Obtiene la fecha actual
+    console.log("Fecha actual ////////////////////:", today);
+    const currentDate = today.toISOString().split("T")[0]; // Convierte la fecha a string en formato YYYY-MM-DD
+
+    const { numero_tel_terapeuta } = req.params;
+    try {
+        const citas = await CitaModel.findAll({
+            where: {
+                numero_tel_terapeuta: numero_tel_terapeuta,
+            },
+            include: [
+                {
+                    model: ExpedienteModel,
+                    attributes: ["nombre"],
+                },
+            ],
+        });
+        const citasNoHoy = citas.filter(cita => cita.fecha === currentDate);
+        res.status(200).json(citasNoHoy);
+    }
+    catch (error) {
+        console.error("Error al obtener las citas:", error);
+        res.status(500).json({ error: "Error al obtener las citas" });
+    }
+}
 
 export const getCitasTerapeutaSemana = async (req, res) => {
   const { dia } = req.body; // Obtiene el elemento "dia" del cuerpo de la solicitud

@@ -3,7 +3,6 @@ import {
   UsuarioModel,
   PacientesTerapeutasModel,
   PacienteEstadoModel,
-  EstadoActualModel,
   CitaModel,
 } from "../models/ExpedienteModel.js";
 import { Op } from "sequelize";
@@ -112,37 +111,6 @@ export const deletePacientesTerapeutas = async (req, res) => {
   }
 };
 
-export const updateEstadoActualTerminado = async (req, res) => {
-  try {
-    const { exp_num } = req.params; // Obtener el exp_num de los parámetros de la ruta
-
-    // Actualizar el estado actual a 0
-    const [updated] = await EstadoActualModel.update(
-      { tratamiento_estado: 2 }, // Valores a actualizar
-      { where: { exp_num } } // Condición para seleccionar el registro
-    );
-
-    if (updated) {
-      const updatedEstadoActual = await EstadoActualModel.findOne({
-        where: { exp_num },
-      });
-      res.status(200).json(updatedEstadoActual);
-    } else {
-      res.status(404).json({ message: "Estado actual no encontrado" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const createEstadoActual = async (req, res) => {
-  try {
-    await EstadoActualModel.create(req.body);
-    res.json({ message: "Estado actual creado" });
-  } catch (error) {
-    res.json({ message: error });
-  }
-};
 
 export const getTerapeutaWithPatients = async (req, res) => {
   try {
@@ -177,50 +145,6 @@ export const getTerapeutaWithPatients = async (req, res) => {
   }
 };
 
-export const getEstadoActualByTerapeuta = async (req, res) => {
-  try {
-    const { numero_tel } = req.params;
-
-    // Obtener los pacientes asociados al terapeuta
-    const pacientesTerapeutas = await PacientesTerapeutasModel.findAll({
-      where: { numero_tel_terapeuta: numero_tel },
-      attributes: ["exp_num"],
-    });
-
-    if (pacientesTerapeutas.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No se encontraron pacientes para este terapeuta" });
-    }
-
-    const expNums = pacientesTerapeutas.map((pt) => pt.exp_num);
-
-    // Obtener las entidades de estado_actual para los pacientes encontrados
-    const estadosActuales = await EstadoActualModel.findAll({
-      where: { exp_num: expNums },
-    });
-
-    res.json(estadosActuales);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const getEstadoActualTodosPacientes = async (req, res) => {
-  try {
-    const estadosActuales = await EstadoActualModel.findAll({
-      order: [["exp_num", "ASC"]],
-    });
-
-    if (estadosActuales.length === 0) {
-      return res.status(404).json({ message: "No se encontraron estados" });
-    }
-
-    res.json(estadosActuales);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 // Crear una nueva cita
 export const createCita = async (req, res) => {
@@ -347,18 +271,6 @@ export const updateCitaFechaHora = async (req, res) => {
     cita.hora = hora;
     await cita.save();
 
-    const { exp_num } = cita;
-
-    const estadoActual = await EstadoActualModel.findOne({
-      where: { exp_num },
-    });
-    if (estadoActual) {
-      estadoActual.cita_estado = 1;
-      await estadoActual.save();
-    } else {
-      await EstadoActualModel.create({ exp_num, cita_estado: 1 });
-    }
-
     res.json(cita);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -402,5 +314,41 @@ export const getCitasSinFechaNiHoraPorExpNum = async (req, res) => {
     res.json(citas);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Timeline obtener citas por paciente
+export const getCitasByPaciente = async (req, res) => {
+  try {
+    const { exp_num } = req.params;
+    
+    const citas = await CitaModel.findAll({
+      where: { exp_num },
+      include: [
+        {
+          model: ExpedienteModel,
+          attributes: ["nombre"],
+        },
+      ],
+      order: [
+        ['fecha', 'ASC'],
+        ['hora', 'ASC'],
+      ],
+    });
+
+    if (citas.length === 0) {
+      return res.status(404).json({ 
+        message: "No se encontraron citas para este paciente",
+        citas: []
+      });
+    }
+
+    res.json(citas);
+  } catch (error) {
+    console.error("Error al obtener citas del paciente:", error);
+    res.status(500).json({ 
+      message: "Error al obtener las citas del paciente",
+      error: error.message 
+    });
   }
 };
