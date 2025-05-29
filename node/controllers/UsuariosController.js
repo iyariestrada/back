@@ -231,10 +231,6 @@ export const getUsuariosByTipo = async (req, res) => {
     }
 
     res.json({
-      //count: usuarios.length,
-      //tipo_buscado: tipo,
-      //tipo_descripcion: getRolNombre(tipo),
-      //resultados: usuarios,
       usuarios,
     });
   } catch (error) {
@@ -729,7 +725,7 @@ export const forgotPassword = async (req, res) => {
       message: "Error al procesar la solicitud",
       error: error.message,
       stack: error.stack, // Esto muestra el stacktrace
-      detalles: error, // Esto muestra el objeto error completo (puedes quitarlo si es muy extenso)
+      detalles: error, // Esto muestra el objeto error completo
     });
   }
 };

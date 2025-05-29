@@ -15,7 +15,22 @@ import {
   getTerapeutaWithPatients,
   getEstadoActualByTerapeuta,
   getEstadoActualTodosPacientes,
+  createCita,
+  getCitasSinFechaNiHora,
+  getCitasByTerapeuta,
+  getCitas,
+  getCitaById,
+  updateCita,
+  updateCitaFechaHora,
+  deleteCita,
+  getCitasSinFechaNiHoraPorExpNum,
 } from "../controllers/ExpedienteController.js";
+
+import {
+  getCitasTerapeutaDia,
+  getCitasTerapeutaDiaByDia,
+  getCitasTerapeutaSemana,
+} from "../controllers/HorarioController.js";
 
 import {
   createUsuario,
@@ -37,19 +52,6 @@ import {
   resetPassword,
 } from "../controllers/UsuariosController.js";
 
-import {
-  createCita,
-  getCitasSinFechaNiHora,
-  getCitasByTerapeuta,
-  getCitas,
-  getCitaById,
-  updateCita,
-  updateCitaFechaHora,
-  deleteCita,
-  getCitasSinFechaNiHoraPorExpNum,
-} from "../controllers/CitasController.js";
-
-import { fr } from "date-fns/locale";
 const router = express.Router();
 
 // Rutas públicas (sin autenticación)
@@ -67,6 +69,9 @@ router.get("/:exp_num", getExpediente);
 router.put("/:exp_num", updateExpediente);
 
 router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
+
+router.get("/estadopacientes/todos", getEstadoActualTodosPacientes);
+router.get("/estadopacientes/:numero_tel", getEstadoActualByTerapeuta);
 
 router.get("/estadopacientes/todos", getEstadoActualTodosPacientes);
 router.get("/estadopacientes/:numero_tel", getEstadoActualByTerapeuta);
@@ -95,5 +100,12 @@ router.get("/citas/:numero_tel_terapeuta", getCitasByTerapeuta);
 router.put("/agendar-cita/:cita_id", updateCitaFechaHora);
 router.put("/estadoactual/:exp_num", updateEstadoActualTerminado);
 router.get("/cita/sinfecha/sinhora/:exp_num", getCitasSinFechaNiHoraPorExpNum);
+
+//horario de un dia de un terapeuta
+router.get("/horario/:numero_tel_terapeuta", getCitasTerapeutaDia);
+
+router.post("/horario/:numero_tel_terapeuta", getCitasTerapeutaDiaByDia);
+
+router.post("/horario/semana/:numero_tel_terapeuta", getCitasTerapeutaSemana);
 
 export default router;
