@@ -5,6 +5,7 @@ import {
   deletePacienteEstado,
   getPacienteEstadosByTerapeuta,
   getAllPacienteEstados,
+  getPacienteEstadoByExpNum,
 } from "../controllers/PacienteEstadoController.js";
 
 const router = Router();
@@ -13,7 +14,7 @@ const router = Router();
 router.post("/", createPacienteEstado);
 
 // Actualizar un estado de paciente
-router.put("/:id_estado", updatePacienteEstado);
+router.put("/:exp_num", updatePacienteEstado);
 
 // Eliminar un estado de paciente
 router.delete("/:id_estado", deletePacienteEstado);
@@ -23,5 +24,6 @@ router.get("/terapeuta/:numero_tel_terapeuta", getPacienteEstadosByTerapeuta);
 
 // Obtener todos los estados de todos los pacientes
 router.get("/", getAllPacienteEstados);
-
+// Obtener el estado de un paciente por su número de expediente
+router.get("/:exp_num", getPacienteEstadoByExpNum);
 export default router;

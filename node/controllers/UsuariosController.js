@@ -3,7 +3,6 @@ import {
   UsuarioModel,
   PacientesTerapeutasModel,
   PacienteEstadoModel,
-  EstadoActualModel,
   CitaModel,
 } from "../models/ExpedienteModel.js";
 

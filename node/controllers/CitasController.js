@@ -63,6 +63,13 @@ import {
         res.status(400).json({ error: "Ya existe una cita previa" });
       } 
       else {
+        if (tipo == "D") {
+            await PacienteEstadoModel.update(
+              { estado: "T" },
+              { where: { exp_num } }
+            );
+            ////Peticion de API OSCAR FINALIZACION DE TRATAMIENTO
+          }
         const cita = await CitaModel.create({
           exp_num,
           numero_tel_terapeuta,
