@@ -19,11 +19,7 @@ import {
   getPacientesTerapeutas,
   updatePacientesTerapeutas,
   deletePacientesTerapeutas,
-  updateEstadoActualTerminado,
-  createEstadoActual,
   getTerapeutaWithPatients,
-  getEstadoActualByTerapeuta,
-  getEstadoActualTodosPacientes,
   createCita,
   getCitasSinFechaNiHora,
   getCitasByTerapeuta,
@@ -33,6 +29,7 @@ import {
   updateCitaFechaHora,
   deleteCita,
   getCitasSinFechaNiHoraPorExpNum,
+  getCitasByPaciente,
 } from "../controllers/ExpedienteController.js";
 
 import {getCitasTerapeutaDia, getCitasTerapeutaDiaByDia, getCitasTerapeutaSemana} from "../controllers/HorarioController.js";
@@ -52,13 +49,9 @@ router.put("/:exp_num", updateExpediente);
 
 router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
 
-router.get("/estadopacientes/todos", getEstadoActualTodosPacientes);
-router.get("/estadopacientes/:numero_tel", getEstadoActualByTerapeuta);
-
 router.get("/usuarios/pacientes", getPacientes);
 
 router.post("/pacientesterapeutas", createPacientesTerapeutas);
-router.post("/pacienteestado/actual", createEstadoActual);
 
 router.post("/usuarios/new", createUsuario);
 router.get("/usuarios/terapeutas", getOnlyTerapeutas);
@@ -72,7 +65,6 @@ router.get("/citas/sinfecha/sinhora", getCitasSinFechaNiHora);
 router.get("/citas/:numero_tel_terapeuta", getCitasByTerapeuta);
 
 router.put("/agendar-cita/:cita_id", updateCitaFechaHora);
-router.put("/estadoactual/:exp_num", updateEstadoActualTerminado);
 router.get("/cita/sinfecha/sinhora/:exp_num", getCitasSinFechaNiHoraPorExpNum);
 
 
@@ -82,6 +74,8 @@ router.get("/horario/:numero_tel_terapeuta", getCitasTerapeutaDia);
 router.post("/horario/:numero_tel_terapeuta", getCitasTerapeutaDiaByDia);
 
 router.post("/horario/semana/:numero_tel_terapeuta", getCitasTerapeutaSemana);
+
+router.get("/citas/paciente/:exp_num", getCitasByPaciente);
 
 export default router;
 

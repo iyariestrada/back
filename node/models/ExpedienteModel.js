@@ -95,49 +95,28 @@ const PacientesTerapeutasModel = db.define(
   }
 );
 
-const EstadoActualModel = db.define(
-  "estado_actual",
-  {
-    exp_num: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      references: { model: ExpedienteModel, key: "exp_num" },
-    },
-    cita_estado: { type: DataTypes.TINYINT },
-    tratamiento_estado: { type: DataTypes.TINYINT },
-    diagnostico_final: { type: DataTypes.TINYINT },
-    createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      onUpdate: DataTypes.NOW,
-    },
-  },
-  {
-    tableName: "estado_actual",
-    timestamps: true,
-  }
-);
-
 const PacienteEstadoModel = db.define(
   "paciente_estado",
   {
+    id_estado: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
     exp_num: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: ExpedienteModel, key: "exp_num" },
-      primaryKey: true,
     },
-    etapa: { type: DataTypes.STRING(20), allowNull: false, primaryKey: true },
-    numero_tel_terapeuta: {
-      type: DataTypes.STRING(15),
+    estado: {
+      type: DataTypes.STRING(1),
       allowNull: false,
-      references: { model: UsuarioModel, key: "numero_tel" }, // Cambiado a UsuarioModel
-      primaryKey: true,
     },
-    sesion_num: { type: DataTypes.INTEGER, allowNull: true },
-    etapa_actual: { type: DataTypes.TINYINT, allowNull: true },
-    createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
     updatedAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
@@ -146,6 +125,7 @@ const PacienteEstadoModel = db.define(
   },
   {
     timestamps: true,
+    tableName: "paciente_estado",
   }
 );
 
@@ -178,13 +158,8 @@ UsuarioModel.belongsToMany(ExpedienteModel, {
   as: "pacientes", // Opcional: alias para la relación
 });
 
-EstadoActualModel.belongsTo(ExpedienteModel, { foreignKey: "exp_num" });
 
 PacienteEstadoModel.belongsTo(ExpedienteModel, { foreignKey: "exp_num" });
-PacienteEstadoModel.belongsTo(UsuarioModel, {
-  foreignKey: "numero_tel_terapeuta",
-  as: "terapeuta", // Opcional: alias para la relación
-});
 
 CitaModel.belongsTo(ExpedienteModel, { foreignKey: 'exp_num', targetKey: 'exp_num' });
 ExpedienteModel.hasMany(CitaModel, { foreignKey: 'exp_num', sourceKey: 'exp_num' });
@@ -195,6 +170,5 @@ export {
   UsuarioModel,
   PacientesTerapeutasModel,
   PacienteEstadoModel,
-  EstadoActualModel,
   CitaModel,
 };

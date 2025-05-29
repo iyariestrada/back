@@ -3,7 +3,6 @@ import {
     UsuarioModel,
     PacientesTerapeutasModel,
     PacienteEstadoModel,
-    EstadoActualModel,
     CitaModel,
 } from "../models/ExpedienteModel.js";
 import { Op } from "sequelize";
@@ -12,8 +11,9 @@ import sequelize from "../database/db.js";
 //citas <= al dia de hoy 
 export const getCitasTerapeutaDia = async (req, res) => {
     const today = new Date(); // Obtiene la fecha actual
+    console.log("Fecha actual ////////////////////:", today);
     const currentDate = today.toISOString().split("T")[0]; // Convierte la fecha a string en formato YYYY-MM-DD
-    console.log("Fecha actual (como string):", currentDate);
+
     const { numero_tel_terapeuta } = req.params;
     try {
         const citas = await CitaModel.findAll({
