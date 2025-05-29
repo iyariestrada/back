@@ -1,4 +1,8 @@
-import { PacienteEstadoModel, PacientesTerapeutasModel, ExpedienteModel } from "../models/ExpedienteModel.js";
+import {
+  PacienteEstadoModel,
+  PacientesTerapeutasModel,
+  ExpedienteModel,
+} from "../models/ExpedienteModel.js";
 
 // Crear un nuevo estado de paciente
 export const createPacienteEstado = async (req, res) => {
@@ -46,7 +50,6 @@ export const deletePacienteEstado = async (req, res) => {
   }
 };
 
-
 // Obtener todos los estados de pacientes de un terapeuta específico
 export const getPacienteEstadosByTerapeuta = async (req, res) => {
   try {
@@ -54,14 +57,14 @@ export const getPacienteEstadosByTerapeuta = async (req, res) => {
     // Buscar todos los exp_num asociados al terapeuta
     const relaciones = await PacientesTerapeutasModel.findAll({
       where: { numero_tel_terapeuta },
-      attributes: ['exp_num'],
+      attributes: ["exp_num"],
     });
-    const expNums = relaciones.map(r => r.exp_num);
+    const expNums = relaciones.map((r) => r.exp_num);
 
     // Buscar todos los estados de esos pacientes
     const estados = await PacienteEstadoModel.findAll({
       where: { exp_num: expNums },
-      include: [{ model: ExpedienteModel, attributes: ['nombre', 'exp_num'] }]
+      include: [{ model: ExpedienteModel, attributes: ["nombre", "exp_num"] }],
     });
 
     res.json(estados);
@@ -74,7 +77,7 @@ export const getPacienteEstadosByTerapeuta = async (req, res) => {
 export const getAllPacienteEstados = async (req, res) => {
   try {
     const estados = await PacienteEstadoModel.findAll({
-      include: [{ model: ExpedienteModel, attributes: ['nombre', 'exp_num'] }]
+      include: [{ model: ExpedienteModel, attributes: ["nombre", "exp_num"] }],
     });
     res.json(estados);
   } catch (error) {

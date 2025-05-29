@@ -13,7 +13,7 @@ const router = Router();
 router.post("/", createPacienteEstado);
 
 // Actualizar un estado de paciente
-router.put("/:id_estado", updatePacienteEstado);
+router.put("/:exp_num", updatePacienteEstado);
 
 // Eliminar un estado de paciente
 router.delete("/:id_estado", deletePacienteEstado);
