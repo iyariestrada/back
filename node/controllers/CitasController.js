@@ -142,8 +142,8 @@ export const getEtapaCita = async (req, res) => {
     const citaMasReciente = await CitaModel.findOne({
       where: { exp_num },
       order: [
-        ['fecha', 'DESC'],
-        ['hora', 'DESC'],
+        ["fecha", "DESC"],
+        ["hora", "DESC"],
       ],
     });
 
@@ -181,28 +181,6 @@ export const createPrimeraCitaSiguienteEtapa = async (req, res) => {
       etapa: String.fromCharCode(citaMasReciente.etapa.charCodeAt(0) + 1),
     });
     res.status(201).json(cita);
-  } catch (error) {
-    console.error("Error creating cita:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-export const getEtapaCita = async (req, res) => {
-  const { exp_num } = req.params;
-  console.log("EXP_NUM" + exp_num);
-  try {
-    const citaMasReciente = await CitaModel.findOne({
-      where: {
-        exp_num,
-        fecha: { [Op.ne]: null },
-        hora: { [Op.ne]: null },
-      },
-      order: [
-        ["fecha", "DESC"],
-        ["hora", "DESC"],
-      ],
-    });
-    res.status(201).json(citaMasReciente.etapa);
   } catch (error) {
     console.error("Error creating cita:", error);
     res.status(500).json({ error: "Internal server error" });
