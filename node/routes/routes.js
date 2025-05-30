@@ -81,6 +81,7 @@ router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
 router.post("/pacientesterapeutas", createPacientesTerapeutas);
 
 // Rutas de citas protegidas
+router.get("/todas/las/citas", getCitas);
 router.post("/cita", createCita);
 router.get("/citas/sinfecha/sinhora", getCitasSinFechaNiHora);
 router.get("/citas/:numero_tel_terapeuta", getCitasByTerapeuta);
