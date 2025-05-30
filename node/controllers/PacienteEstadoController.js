@@ -58,6 +58,7 @@ export const getPacienteEstadosByTerapeuta = async (req, res) => {
     const relaciones = await PacientesTerapeutasModel.findAll({
       where: { numero_tel_terapeuta },
       attributes: ["exp_num"],
+      attributes: ["exp_num"],
     });
     const expNums = relaciones.map((r) => r.exp_num);
 
@@ -78,9 +79,29 @@ export const getAllPacienteEstados = async (req, res) => {
   try {
     const estados = await PacienteEstadoModel.findAll({
       include: [{ model: ExpedienteModel, attributes: ["nombre", "exp_num"] }],
+      include: [{ model: ExpedienteModel, attributes: ["nombre", "exp_num"] }],
     });
     res.json(estados);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const getPacienteEstadoByExpNum = async (req, res) => {
+  try {
+    const { exp_num } = req.params;
+    const estado = await PacienteEstadoModel.findOne({
+      where: { exp_num },
+      include: [{ model: ExpedienteModel, attributes: ["nombre", "exp_num"] }],
+    });
+
+    if (estado) {
+      res.json(estado);
+    } else {
+      res.status(404).json({ message: "Estado no encontrado" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}

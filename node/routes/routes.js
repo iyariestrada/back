@@ -59,18 +59,7 @@ router.post("/usuarios/completeregistration", completeRegistration);
 router.post("/usuarios/forgotpass", forgotPassword);
 router.post("/usuarios/verifycode", verifyCode);
 router.post("/usuarios/resetpass", resetPassword);
-
-// Rutas protegidas (requieren token válido)
-router.post("/", createExpediente);
-router.get("/:exp_num", getExpediente);
-router.put("/:exp_num", updateExpediente);
-
-router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
-
 router.get("/usuarios/pacientes", getPacientes);
-
-router.post("/pacientesterapeutas", createPacientesTerapeutas);
-
 router.post("/usuarios/new", createUsuario);
 router.get("/usuarios/all", getAllUsuarios);
 router.get("/usuarios/terapeutas", getOnlyTerapeutas);
@@ -82,7 +71,17 @@ router.put("/usuarios/updatephone/:numero_tel", updateUserPhone);
 router.put("/usuarios/changepassword/:numero_tel", updatePassword);
 router.delete("/usuarios/:numero_tel", deleteUsuario);
 
+// Rutas protegidas (requieren token válido)
+router.post("/", createExpediente);
+router.get("/:exp_num", getExpediente);
+router.put("/:exp_num", updateExpediente);
+
+router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
+
+router.post("/pacientesterapeutas", createPacientesTerapeutas);
+
 // Rutas de citas protegidas
+router.get("/todas/las/citas", getCitas);
 router.post("/cita", createCita);
 router.get("/citas/sinfecha/sinhora", getCitasSinFechaNiHora);
 router.get("/citas/:numero_tel_terapeuta", getCitasByTerapeuta);

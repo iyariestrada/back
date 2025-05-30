@@ -170,6 +170,7 @@ export const createCita = async (req, res) => {
   }
 };
 
+
 // Obtener citas sin fecha ni hora
 export const getCitasSinFechaNiHora = async (req, res) => {
   try {
@@ -212,11 +213,20 @@ export const getCitasByTerapeuta = async (req, res) => {
   }
 };
 
-// Obtener todas las citas
+// Esto realmente va a devolver todos los pacientes 
 export const getCitas = async (req, res) => {
   try {
-    const citas = await CitaModel.findAll();
-    res.json(citas);
+    const expedientes = await ExpedienteModel.findAll({
+      order: [["nombre", "ASC"]],
+      attributes: [
+        "exp_num",
+        "nombre",
+        "fecha_nacimiento",
+        "numero_tel",
+        "remitido",
+      ],
+    });
+    res.json(expedientes);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
