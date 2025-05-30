@@ -31,14 +31,21 @@ export const getExpediente = async (req, res) => {
 
 export const updateExpediente = async (req, res) => {
   try {
-    await ExpedienteModel.update(req.body, {
+    const [updatedRows] = await ExpedienteModel.update(req.body, {
       where: { exp_num: req.params.exp_num },
     });
+
+    if (updatedRows === 0) {
+      return res.status(404).json({
+        message: "No se encontró el expediente o no hubo cambios.",
+      });
+    }
+
     res.json({
       message: "¡Registro actualizado correctamente!",
     });
   } catch (error) {
-    res.json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -111,7 +118,6 @@ export const deletePacientesTerapeutas = async (req, res) => {
   }
 };
 
-
 export const getTerapeutaWithPatients = async (req, res) => {
   try {
     const { numero_tel } = req.params;
@@ -145,7 +151,6 @@ export const getTerapeutaWithPatients = async (req, res) => {
   }
 };
 
-
 // Crear una nueva cita
 export const createCita = async (req, res) => {
   try {
@@ -169,7 +174,6 @@ export const createCita = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Obtener citas sin fecha ni hora
 export const getCitasSinFechaNiHora = async (req, res) => {
@@ -213,7 +217,7 @@ export const getCitasByTerapeuta = async (req, res) => {
   }
 };
 
-// Esto realmente va a devolver todos los pacientes 
+// Esto realmente va a devolver todos los pacientes
 export const getCitas = async (req, res) => {
   try {
     const expedientes = await ExpedienteModel.findAll({
@@ -331,7 +335,7 @@ export const getCitasSinFechaNiHoraPorExpNum = async (req, res) => {
 export const getCitasByPaciente = async (req, res) => {
   try {
     const { exp_num } = req.params;
-    
+
     const citas = await CitaModel.findAll({
       where: { exp_num },
       include: [
@@ -341,24 +345,24 @@ export const getCitasByPaciente = async (req, res) => {
         },
       ],
       order: [
-        ['fecha', 'ASC'],
-        ['hora', 'ASC'],
+        ["fecha", "ASC"],
+        ["hora", "ASC"],
       ],
     });
 
     if (citas.length === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         message: "No se encontraron citas para este paciente",
-        citas: []
+        citas: [],
       });
     }
 
     res.json(citas);
   } catch (error) {
     console.error("Error al obtener citas del paciente:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Error al obtener las citas del paciente",
-      error: error.message 
+      error: error.message,
     });
   }
 };
