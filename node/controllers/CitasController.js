@@ -122,6 +122,42 @@ export const createNextCitaMismaEtapa = async (req, res) => {
   }
 };
 
+export const getEtapaCita = async (req, res) => {
+  const { exp_num } = req.params;
+  try {
+    // Buscar primero una cita pendiente (fecha y hora null)
+    const citaPendiente = await CitaModel.findOne({
+      where: {
+        exp_num,
+        fecha: { [Op.is]: null },
+        hora: { [Op.is]: null },
+      },
+    });
+
+    if (citaPendiente) {
+      return res.status(200).json(citaPendiente.etapa);
+    }
+
+    // Si no hay cita pendiente, buscar la cita más reciente con fecha y hora
+    const citaMasReciente = await CitaModel.findOne({
+      where: { exp_num },
+      order: [
+        ['fecha', 'DESC'],
+        ['hora', 'DESC'],
+      ],
+    });
+
+    if (!citaMasReciente) {
+      return res.status(404).json({ message: "No se encontró cita" });
+    }
+
+    res.status(200).json(citaMasReciente.etapa);
+  } catch (error) {
+    console.error("Error obteniendo etapa de cita:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const createPrimeraCitaSiguienteEtapa = async (req, res) => {
   const { exp_num, numero_tel_terapeuta } = req.body;
   try {
