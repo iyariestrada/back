@@ -22,6 +22,7 @@ import {
   getCitasSinFechaNiHoraPorExpNum,
   getCitasByPaciente,
   getTerapeutasDiagnostico,
+  getTerapeutasDePaciente,
 } from "../controllers/ExpedienteController.js";
 
 import {
@@ -81,6 +82,7 @@ router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
 
 router.post("/pacientesterapeutas", createPacientesTerapeutas);
 router.get("/terapeutasdiagnostico/:exp_num", getTerapeutasDiagnostico);
+router.get("/terapeutas-paciente/:exp_num", getTerapeutasDePaciente);
 
 // Rutas de citas protegidas
 router.get("/todas/las/citas", getCitas);
