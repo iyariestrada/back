@@ -142,8 +142,8 @@ export const getEtapaCita = async (req, res) => {
     const citaMasReciente = await CitaModel.findOne({
       where: { exp_num },
       order: [
-        ['fecha', 'DESC'],
-        ['hora', 'DESC'],
+        ["fecha", "DESC"],
+        ["hora", "DESC"],
       ],
     });
 
