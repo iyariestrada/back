@@ -129,19 +129,35 @@ const PacienteEstadoModel = db.define(
   }
 );
 
-const CitaModel = db.define("cita", {
+const CitaModel = db.define(
+  "cita",
+  {
     cita_id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    exp_num: { type: DataTypes.INTEGER, allowNull: true, references: { model: "pacientes", key: "exp_num" } },
-    numero_tel_terapeuta: { type: DataTypes.STRING(15), allowNull: true, references: { model: "terapeuta", key: "numero_tel" } },
+    exp_num: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "pacientes", key: "exp_num" },
+    },
+    numero_tel_terapeuta: {
+      type: DataTypes.STRING(15),
+      allowNull: true,
+      references: { model: "terapeuta", key: "numero_tel" },
+    },
     fecha: { type: DataTypes.DATEONLY, allowNull: true },
     hora: { type: DataTypes.TIME, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-    updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, onUpdate: DataTypes.NOW },
+    updatedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+      onUpdate: DataTypes.NOW,
+    },
     etapa: { type: DataTypes.STRING(1), allowNull: true },
-}, {
-    tableName: 'cita', // Especificar el nombre de la tabla
-    timestamps: true
-});
+  },
+  {
+    tableName: "cita", // Especificar el nombre de la tabla
+    timestamps: true,
+  }
+);
 
 // Definición de relaciones
 ExpedienteModel.belongsToMany(UsuarioModel, {
@@ -158,11 +174,16 @@ UsuarioModel.belongsToMany(ExpedienteModel, {
   as: "pacientes", // Opcional: alias para la relación
 });
 
-
 PacienteEstadoModel.belongsTo(ExpedienteModel, { foreignKey: "exp_num" });
 
-CitaModel.belongsTo(ExpedienteModel, { foreignKey: 'exp_num', targetKey: 'exp_num' });
-ExpedienteModel.hasMany(CitaModel, { foreignKey: 'exp_num', sourceKey: 'exp_num' });
+CitaModel.belongsTo(ExpedienteModel, {
+  foreignKey: "exp_num",
+  targetKey: "exp_num",
+});
+ExpedienteModel.hasMany(CitaModel, {
+  foreignKey: "exp_num",
+  sourceKey: "exp_num",
+});
 
 // Exportamos  modelos
 export {
