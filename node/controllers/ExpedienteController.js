@@ -366,3 +366,29 @@ export const getCitasByPaciente = async (req, res) => {
     });
   }
 };
+
+// En tu controller de usuarios o citas
+export const getTerapeutasDiagnostico = async (req, res) => {
+  const { exp_num } = req.params;
+  try {
+    const relaciones = await PacientesTerapeutasModel.findAll({
+      where: {
+        exp_num,
+        etapa: ["A", "B", "C"], // Solo etapas de diagnóstico
+      },
+      attributes: ["numero_tel_terapeuta"],
+      group: ["numero_tel_terapeuta"],
+    });
+
+    // Obtener datos completos de los terapeutas
+    const terapeutas = await UsuarioModel.findAll({
+      where: {
+        numero_tel: relaciones.map((r) => r.numero_tel_terapeuta),
+      },
+    });
+
+    res.json(terapeutas);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

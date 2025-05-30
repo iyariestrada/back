@@ -21,6 +21,7 @@ import {
   deleteCita,
   getCitasSinFechaNiHoraPorExpNum,
   getCitasByPaciente,
+  getTerapeutasDiagnostico,
 } from "../controllers/ExpedienteController.js";
 
 import {
@@ -79,6 +80,7 @@ router.put("/:exp_num", updateExpediente);
 router.get("/vistaprevia/:numero_tel", getTerapeutaWithPatients);
 
 router.post("/pacientesterapeutas", createPacientesTerapeutas);
+router.get("/terapeutasdiagnostico/:exp_num", getTerapeutasDiagnostico);
 
 // Rutas de citas protegidas
 router.get("/todas/las/citas", getCitas);
