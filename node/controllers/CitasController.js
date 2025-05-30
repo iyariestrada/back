@@ -186,7 +186,7 @@ export const createPrimeraCitaSiguienteEtapa = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
+/*
 export const getEtapaCita = async (req, res) => {
   const { exp_num } = req.params;
   console.log("EXP_NUM" + exp_num);
@@ -208,3 +208,5 @@ export const getEtapaCita = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+*/
