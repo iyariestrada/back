@@ -392,3 +392,21 @@ export const getTerapeutasDiagnostico = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getTerapeutasDePaciente = async (req, res) => {
+  const { exp_num } = req.params;
+  try {
+    const citas = await CitaModel.findAll({
+      where: { exp_num, numero_tel_terapeuta: { [Op.ne]: null } },
+      attributes: ["numero_tel_terapeuta"],
+      group: ["numero_tel_terapeuta"],
+    });
+    const terapeutasIds = citas.map((c) => c.numero_tel_terapeuta);
+    const terapeutas = await UsuarioModel.findAll({
+      where: { numero_tel: terapeutasIds },
+    });
+    res.json(terapeutas);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
